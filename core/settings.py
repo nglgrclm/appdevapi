@@ -28,7 +28,7 @@ SECRET_KEY = 'django-insecure-^$o5f9$gv%rt*$3m@pgnkx_=&phg1ju(^5f96fewwwwwte%4!2
 DEBUG = True
 
 ALLOWED_HOSTS = [
-    'https://appdevapi.onrender.com/'
+    'appdevapi.onrender.com'
 ]
 
 
