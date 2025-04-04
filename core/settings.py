@@ -28,7 +28,7 @@ SECRET_KEY = 'django-insecure-^$o5f9$gv%rt*$3m@pgnkx_=&phg1ju(^5f96fewwwwwte%4!2
 DEBUG = True
 
 ALLOWED_HOSTS = [
-    'appdevapi.onrender.com'
+    'https://appdevapi.onrender.com/'
 ]
 
 
@@ -140,7 +140,7 @@ CORS_ALLOW_ALL_ORIGINS = True
 
 CORS_ALLOWED_ORIGINS = [
     'http://localhost:5173',
-    'appdevtodoapp.pages.dev'
+    'https://appdevtodoapp.pages.dev'
     # Your frontend's URL
 ]
 
