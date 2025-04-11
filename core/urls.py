@@ -23,6 +23,4 @@ from todolist.views import SecureHelloView
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include('todolist.urls')),
-    path('api-token-auth/', obtain_auth_token),
-    path('secure-hello/', SecureHelloView.as_view()),
 ]
