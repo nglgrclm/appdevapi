@@ -3,11 +3,12 @@ from sqlalchemy.orm import Session
 from pydantic import BaseModel
 from typing import List
 from database import SessionLocal, engine
-from models import Book, Base
+from models import TodoItem, Base
 
 # Create tables in the database
 Base.metadata.create_all(bind=engine)
 app = FastAPI()
+
 # Dependency to get the database session
 def get_db():
     db = SessionLocal()
@@ -15,25 +16,28 @@ def get_db():
         yield db
     finally:
         db.close()
-# Pydantic model to use in FastAPI request and response
-class BookCreate(BaseModel):
-    title: str
-    author: str
-class BookOut(BookCreate):
-    id: int
-class Config:
-        orm_mode = True
-# Endpoint to fetch all books
-@app.get("/books", response_model=List[BookOut])
-def get_books(db: Session = Depends(get_db)):
-    books = db.query(Book).all()
-    return books
 
-# Endpoint to add a new book
-@app.post("/books", response_model=BookOut)
-def add_book(book: BookCreate, db: Session = Depends(get_db)):
-    db_book = Book(title=book.title, author=book.author)
-    db.add(db_book)
+# Pydantic model to use in FastAPI request and response
+class TodoItemCreate(BaseModel):
+    task: str
+    description: str
+class TodoItemOut(TodoItemCreate):
+    id: int
+    is_completed: int
+    class Config:
+        orm_mode = True
+
+# Endpoint to fetch all todo items
+@app.get("/todos", response_model=List[TodoItemOut])
+def get_todos(db: Session = Depends(get_db)):
+    todos = db.query(TodoItem).all()
+    return todos
+
+# Endpoint to add a new todo item
+@app.post("/todos", response_model=TodoItemOut)
+def add_todo(todo: TodoItemCreate, db: Session = Depends(get_db)):
+    db_todo = TodoItem(task=todo.task, description=todo.description)
+    db.add(db_todo)
     db.commit()
-    db.refresh(db_book)
-    return db_book
+    db.refresh(db_todo)
+    return db_todo
