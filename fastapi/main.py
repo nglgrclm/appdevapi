@@ -61,7 +61,7 @@ def add_todo(todo: TodoItemCreate, db: Session = Depends(get_db)):
     return db_todo
 
 # Endpoint to update a task by ID
-@app.put("/todos/{todo_id}", response_model=ToDoResponse)
+@app.put("/todos/{todo_id}", response_model=TodoItemResponse)
 def update_todo(todo_id: int, todo_update: TodoItemUpdate, db: Session = Depends(get_db)):
     todo = db.query(ToDoApp).filter(TodoItem.id == todo_id).first()
     if not todo:
