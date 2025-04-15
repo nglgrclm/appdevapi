@@ -60,24 +60,32 @@ def add_todo(todo: TodoItemCreate, db: Session = Depends(get_db)):
     db.refresh(db_todo)
     return db_todo
 
-# Endpoint to update a task by ID
-@app.put("/todos/{todo_id}", response_model=TodoItemResponse)
-def update_todo(todo_id: int, todo_update: TodoItemUpdate, db: Session = Depends(get_db)):
-    todo = db.query(ToDoApp).filter(TodoItem.id == todo_id).first()
-    if not todo:
-        raise HTTPException(status_code=404, detail="ToDo not found")
-    for key, value in todo_update.dict(exclude_unset=True).items():
-        setattr(todo, key, value)
-    db.commit()
-    db.refresh(todo)
-    return todo
-
-# Endpoint to delete a task by ID
-@app.delete("/todos/{todo_id}", response_model=dict)
-def delete_todo(todo_id: int, db: Session = Depends(get_db)):
+# Endpoint to fetch a single todo item by ID
+@app.get("/todos/{todo_id}", response_model=TodoItemOut)
+def get_todo(todo_id: int, db: Session = Depends(get_db)):
     todo = db.query(TodoItem).filter(TodoItem.id == todo_id).first()
     if not todo:
-        raise HTTPException(status_code=404, detail="ToDo not found")
-    db.delete(todo)
+        raise HTTPException(status_code=404, detail="Todo item not found")
+    return todo
+
+# Endpoint to update a todo item
+@app.put("/todos/{todo_id}", response_model=TodoItemOut)
+def update_todo(todo_id: int, todo: TodoItemCreate, db: Session = Depends(get_db)):
+    db_todo = db.query(TodoItem).filter(TodoItem.id == todo_id).first()
+    if not db_todo:
+        raise HTTPException(status_code=404, detail="Todo item not found")
+    db_todo.task = todo.task
+    db_todo.description = todo.description
     db.commit()
-    return {"message": "ToDo deleted successfully"}
+    db.refresh(db_todo)
+    return db_todo
+
+# Endpoint to delete a todo item
+@app.delete("/todos/{todo_id}", response_model=dict)
+def delete_todo(todo_id: int, db: Session = Depends(get_db)):
+    db_todo = db.query(TodoItem).filter(TodoItem.id == todo_id).first()
+    if not db_todo:
+        raise HTTPException(status_code=404, detail="Todo item not found")
+    db.delete(db_todo)
+    db.commit()
+    return {"message": "Todo item deleted successfully"}
