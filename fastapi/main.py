@@ -62,8 +62,8 @@ def add_todo(todo: TodoItemCreate, db: Session = Depends(get_db)):
 
 # Endpoint to update a task by ID
 @app.put("/todos/{todo_id}", response_model=ToDoResponse)
-def update_todo(todo_id: int, todo_update: ToDoUpdate, db: Session = Depends(get_db)):
-    todo = db.query(ToDoApp).filter(ToDoApp.id == todo_id).first()
+def update_todo(todo_id: int, todo_update: TodoItemUpdate, db: Session = Depends(get_db)):
+    todo = db.query(ToDoApp).filter(TodoItem.id == todo_id).first()
     if not todo:
         raise HTTPException(status_code=404, detail="ToDo not found")
     for key, value in todo_update.dict(exclude_unset=True).items():
@@ -75,7 +75,7 @@ def update_todo(todo_id: int, todo_update: ToDoUpdate, db: Session = Depends(get
 # Endpoint to delete a task by ID
 @app.delete("/todos/{todo_id}", response_model=dict)
 def delete_todo(todo_id: int, db: Session = Depends(get_db)):
-    todo = db.query(ToDoApp).filter(ToDoApp.id == todo_id).first()
+    todo = db.query(TodoItem).filter(TodoItem.id == todo_id).first()
     if not todo:
         raise HTTPException(status_code=404, detail="ToDo not found")
     db.delete(todo)
