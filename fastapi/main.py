@@ -9,6 +9,21 @@ from models import TodoItem, Base
 Base.metadata.create_all(bind=engine)
 app = FastAPI()
 
+origins = [
+    "http://localhost",
+    "http://localhost:5173",
+    "https://appdevtodoapp.netlify.app",
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+
 # Dependency to get the database session
 def get_db():
     db = SessionLocal()
@@ -41,3 +56,25 @@ def add_todo(todo: TodoItemCreate, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(db_todo)
     return db_todo
+
+# Endpoint to update a task by ID
+@app.put("/todos/{todo_id}", response_model=ToDoResponse)
+def update_todo(todo_id: int, todo_update: ToDoUpdate, db: Session = Depends(get_db)):
+    todo = db.query(ToDoApp).filter(ToDoApp.id == todo_id).first()
+    if not todo:
+        raise HTTPException(status_code=404, detail="ToDo not found")
+    for key, value in todo_update.dict(exclude_unset=True).items():
+        setattr(todo, key, value)
+    db.commit()
+    db.refresh(todo)
+    return todo
+
+# Endpoint to delete a task by ID
+@app.delete("/todos/{todo_id}", response_model=dict)
+def delete_todo(todo_id: int, db: Session = Depends(get_db)):
+    todo = db.query(ToDoApp).filter(ToDoApp.id == todo_id).first()
+    if not todo:
+        raise HTTPException(status_code=404, detail="ToDo not found")
+    db.delete(todo)
+    db.commit()
+    return {"message": "ToDo deleted successfully"}
