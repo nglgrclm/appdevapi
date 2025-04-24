@@ -1,6 +1,5 @@
 from sqlalchemy import Column, Integer, String, Boolean
 
-
 class TodoItem(Base):
     __tablename__ = 'todos'
 
