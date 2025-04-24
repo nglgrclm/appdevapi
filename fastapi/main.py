@@ -4,25 +4,28 @@ from pydantic import BaseModel
 from typing import List, Optional
 from database import SessionLocal, engine
 from models import TodoItem, Base
-from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.cors import CORSMiddleware  # Import CORSMiddleware
 
 # Create tables in the database
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
 
+# Define the allowed origins list (Add your frontend origin here)
 origins = [
-    "http://localhost",
-    "http://localhost:5173",  # React frontend, adjust if necessary
+    "http://localhost",  # Local development (frontend)
+    "http://localhost:5173",  # React frontend during development
     "https://appdevtodoapp.netlify.app",  # Your deployed frontend
+    "https://snack-web-player.s3.us-west-1.amazonaws.com",  # Your S3 frontend URL
 ]
 
+# Add CORS middleware to allow these origins
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origins=origins,  # Allow the specified origins
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["*"],  # Allow all HTTP methods (GET, POST, etc.)
+    allow_headers=["*"],  # Allow all headers
 )
 
 # Dependency to get the database session
