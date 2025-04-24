@@ -1,9 +1,9 @@
-from sqlalchemy import Column, Integer, String
-from database import Base
+from sqlalchemy import Column, Integer, String, Boolean
 
 class TodoItem(Base):
-    __tablename__ = "todo_items"
+    __tablename__ = 'todos'
+
     id = Column(Integer, primary_key=True, index=True)
     task = Column(String, index=True)
     description = Column(String)
-    is_completed = Column(Integer, default=0)  # 0 for incomplete, 1 for complete
+    is_completed = Column(Boolean, default=False)  # This is the new field

@@ -1,21 +1,20 @@
 from fastapi import FastAPI, Depends, HTTPException
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
-from typing import List
+from typing import List, Optional
 from database import SessionLocal, engine
 from models import TodoItem, Base
-from datetime import datetime
 from fastapi.middleware.cors import CORSMiddleware
-
 
 # Create tables in the database
 Base.metadata.create_all(bind=engine)
+
 app = FastAPI()
 
 origins = [
     "http://localhost",
-    "http://localhost:5173",
-    "https://appdevtodoapp.netlify.app",
+    "http://localhost:5173",  # React frontend, adjust if necessary
+    "https://appdevtodoapp.netlify.app",  # Your deployed frontend
 ]
 
 app.add_middleware(
@@ -25,7 +24,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
 
 # Dependency to get the database session
 def get_db():
@@ -39,22 +37,30 @@ def get_db():
 class TodoItemCreate(BaseModel):
     task: str
     description: str
+    is_completed: bool = False  # Set default value to False
+
 class TodoItemOut(TodoItemCreate):
     id: int
-    is_completed: int
+
     class Config:
         orm_mode = True
 
-# Endpoint to fetch all todo items
+# Endpoint to fetch all todo items, with an optional filter for completion status
 @app.get("/todos", response_model=List[TodoItemOut])
-def get_todos(db: Session = Depends(get_db)):
-    todos = db.query(TodoItem).all()
+def get_todos(is_completed: Optional[bool] = None, db: Session = Depends(get_db)):
+    query = db.query(TodoItem)
+    
+    # Apply the filter for completed status if it's provided
+    if is_completed is not None:
+        query = query.filter(TodoItem.is_completed == is_completed)
+        
+    todos = query.all()
     return todos
 
 # Endpoint to add a new todo item
 @app.post("/todos", response_model=TodoItemOut)
 def add_todo(todo: TodoItemCreate, db: Session = Depends(get_db)):
-    db_todo = TodoItem(task=todo.task, description=todo.description)
+    db_todo = TodoItem(task=todo.task, description=todo.description, is_completed=todo.is_completed)
     db.add(db_todo)
     db.commit()
     db.refresh(db_todo)
@@ -76,6 +82,7 @@ def update_todo(todo_id: int, todo: TodoItemCreate, db: Session = Depends(get_db
         raise HTTPException(status_code=404, detail="Todo item not found")
     db_todo.task = todo.task
     db_todo.description = todo.description
+    db_todo.is_completed = todo.is_completed  # Update completion status
     db.commit()
     db.refresh(db_todo)
     return db_todo
