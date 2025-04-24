@@ -1,4 +1,5 @@
 from sqlalchemy import Column, Integer, String, Boolean
+from database import Base  # Import the Base class from database.py
 
 class TodoItem(Base):
     __tablename__ = 'todos'
